@@ -1,0 +1,2 @@
+[target.riscv32im-succinct-zkvm-elf]
+cc = "riscv32-unknown-elf-gcc"

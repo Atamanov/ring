@@ -49,6 +49,10 @@ const X86_64: &str = "x86_64";
 const AARCH64: &str = "aarch64";
 const ARM: &str = "arm";
 const WASM32: &str = "wasm32";
+const RISCV32: &str = "riscv32";
+const RISCV64: &str = "riscv64";
+const RISCV32IM: &str = "riscv32im";
+const RISCV64IM: &str = "riscv64im";
 
 #[rustfmt::skip]
 const RING_SRCS: &[(&[&str], &str)] = &[
@@ -571,6 +575,17 @@ fn configure_cc(c: &mut cc::Build, target: &Target, c_root_dir: &Path, include_d
     if !target.is_debug {
         let _ = c.define("NDEBUG", None);
     }
+    println!("GLHFMF target.arch: {}", target.arch);
+    let cvoutput = Command::new(compiler.path())
+        .arg("--version")
+        .output()
+        .expect("Failed to get GCC version");
+    if let Ok(version) = String::from_utf8(cvoutput.stdout) {
+        eprintln!(
+            "GLHFMF GCC version: {}",
+            version.lines().next().unwrap_or("unknown")
+        );
+    }
 
     // Allow cross-compiling without a target sysroot for these targets.
     if (target.arch == WASM32)
@@ -582,6 +597,14 @@ fn configure_cc(c: &mut cc::Build, target: &Target, c_root_dir: &Path, include_d
             let _ = c.define("RING_CORE_NOSTDLIBINC", "1");
         }
     }
+    /*if (target.arch == RISCV32
+        || target.arch == RISCV64
+        || target.arch == RISCV32IM
+        || target.arch == RISCV64IM)
+    {
+        let _ = c.flag("-nostdinc");
+        let _ = c.define("RING_CORE_NOSTDLIBINC", "1");
+    }*/
 
     if target.force_warnings_into_errors {
         c.warnings_into_errors(true);
